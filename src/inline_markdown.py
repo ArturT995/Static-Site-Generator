@@ -31,6 +31,14 @@ def extract_markdown_links(text):
 def split_nodes_image(old_nodes):
     new_nodes = []
     for node in old_nodes:
+        if node.text_type != TextType.TEXT:
+            new_nodes.append(node)
+            continue
+        original_text = node.text
+        images = extract_markdown_images(original_text)
+        if len(images) == 0:
+            new_nodes.append(node)
+            continue
         text = node.text
         image_tuples_list = extract_markdown_images(text)
         split_nodes = []
@@ -47,16 +55,23 @@ def split_nodes_image(old_nodes):
             current_text = img_split[1]
             img_sections.append(alt)
             img_sections.append(link)
-        #print(sections)
-        #print("img_sections test here:",img_sections)
+            if i == len(image_tuples_list)-1 and len(img_split[1]) > 0:
+                sections.append(img_split[1])
+        #print("sections test here:", sections)
+        #print("img_sections test here:", img_sections)
         link_index = 1
         alt_index = 0
-        for i in range(len(img_sections)):
+        if len(img_sections) % 2 != 0:
+            raise ValueError("invalid markdown, link section not closed")
+        link_index = 1
+        alt_index = 0
+        bigger_list = max(len(img_sections), len(sections))
+        for i in range(bigger_list):
             if sections[i] == "":
                 continue
             if i % 2 == 0:
                 split_nodes.append(TextNode(sections[i], TextType.TEXT))
-            else:
+            if i % 2 != 0:
                 split_nodes.append(TextNode(img_sections[alt_index], TextType.IMAGE, img_sections[link_index]))
                 link_index += 2   #1 3 5   
                 alt_index += 2
@@ -69,12 +84,21 @@ def split_nodes_image(old_nodes):
 def split_nodes_link(old_nodes):
     new_nodes = []
     for node in old_nodes:
+        if node.text_type != TextType.TEXT:
+            new_nodes.append(node)
+            continue
+        original_text = node.text
+        links = extract_markdown_links(original_text)
+        if len(links) == 0:
+            new_nodes.append(node)
+            continue
         text = node.text
         image_tuples_list = extract_markdown_links(text)
         split_nodes = []
         sections = []
         img_sections = []
         current_text = node.text
+        #print("image_tuples_list test here:",image_tuples_list)
         for i in range(len(image_tuples_list)):
             img = "[" + image_tuples_list[i][0] + "]" + "(" + image_tuples_list[i][1]+ ")"
             alt = image_tuples_list[i][0]
@@ -85,16 +109,22 @@ def split_nodes_link(old_nodes):
             current_text = img_split[1]
             img_sections.append(alt)
             img_sections.append(link)
-        #print(sections)
-        #print("img_sections test here:",img_sections)
+            if i == len(image_tuples_list)-1 and len(img_split[1]) > 0:
+                sections.append(img_split[1])
+        
+        #print("sections test here:", sections)
+        #print("img_sections test here:", img_sections)
         link_index = 1
         alt_index = 0
-        for i in range(len(img_sections)):
+        if len(img_sections) % 2 != 0:
+            raise ValueError("invalid markdown, link section not closed")
+        bigger_list = max(len(img_sections), len(sections))
+        for i in range(bigger_list):
             if sections[i] == "":
                 continue
             if i % 2 == 0:
                 split_nodes.append(TextNode(sections[i], TextType.TEXT))
-            else:
+            if i % 2 != 0:
                 split_nodes.append(TextNode(img_sections[alt_index], TextType.LINK, img_sections[link_index]))
                 link_index += 2   #1 3 5   
                 alt_index += 2
@@ -103,6 +133,17 @@ def split_nodes_link(old_nodes):
         #for node in new_nodes:
         #    print(node)
     return new_nodes
+
+def text_to_textnodes(text):
+    node = TextNode(
+            text, TextType.TEXT
+        )
+    delimiter_bold = split_nodes_delimiter([node], "**", TextType.BOLD)
+    delimiter_italic = split_nodes_delimiter(delimiter_bold, "_", TextType.ITALIC)
+    delimiter_code = split_nodes_delimiter(delimiter_italic, "`", TextType.CODE)
+    image = split_nodes_image(delimiter_code)
+    nodes = split_nodes_link(image)
+    return nodes
 
 """
 node = TextNode(
