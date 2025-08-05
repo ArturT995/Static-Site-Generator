@@ -8,21 +8,11 @@ from src.markdown_blocks import (
 )
 from src.htmlnode import HTMLNode, ParentNode
 
-root_path = "static"
-path_items = os.listdir(path="static")
-dest_path = "public"
 
-shutil.rmtree(dest_path)
-
-os.mkdir(dest_path)
-dest_items = os.listdir(path="public")
-
-template_path = "template.html"
-from_path = "content"
-content_items = os.listdir(path="content")
 
 def generate_pages(from_path, template_path, dest_path):
     print(f"Generating page from {from_path} to {dest_path} using {template_path} ")
+    content_items = os.listdir(path=f"{from_path}")
     content_list = static_to_public(from_path, dest_path, content_items, depth=0, max_depth=5)
 
     with open(template_path, "r") as f:
@@ -40,7 +30,7 @@ def generate_pages(from_path, template_path, dest_path):
         result = result.replace("{{ Content }}", html_string, 1)
         if path.endswith(".md"):
             path = path.replace(".md",".html")
-        public_path = path.replace("content/", "public/").replace(".md", ".html")
+        public_path = path.replace("content/", "docs/").replace(".md", ".html")
         os.makedirs(os.path.dirname(public_path), exist_ok=True)
 
 
@@ -74,4 +64,3 @@ def static_to_public(root_path, dest_path, path_items, depth=0, max_depth=5):
 
     return paths_list
 
-generate_pages(from_path, template_path, dest_path)

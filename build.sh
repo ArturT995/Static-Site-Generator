@@ -1,0 +1,1 @@
+python3 main.py "/https://github.com/ArturT995/Static-Site-Generator/"
