@@ -1,5 +1,6 @@
 import os
 import shutil
+import sys
 from src.markdown_blocks import (
     markdown_to_html_node,
     markdown_to_blocks,
@@ -8,6 +9,12 @@ from src.markdown_blocks import (
 )
 from src.htmlnode import HTMLNode, ParentNode
 
+
+basepath = "/"
+
+
+if len(sys.argv) > 1:
+    basepath = sys.argv[1]
 
 
 def generate_pages(from_path, template_path, dest_path):
@@ -28,10 +35,14 @@ def generate_pages(from_path, template_path, dest_path):
         title = extract_title(markdown)
         result = template.replace("{{ Title }}", title, 1)
         result = result.replace("{{ Content }}", html_string, 1)
+        result = result.replace('href="/', f'href="{basepath}')
+        result = result.replace('src="/', f'src="{basepath}')
+        
         if path.endswith(".md"):
             path = path.replace(".md",".html")
         public_path = path.replace("content/", "docs/").replace(".md", ".html")
         os.makedirs(os.path.dirname(public_path), exist_ok=True)
+
 
 
         with open(public_path, "w") as f:
