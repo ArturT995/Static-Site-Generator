@@ -1,5 +1,12 @@
 import os
 import shutil
+from src.markdown_blocks import (
+    markdown_to_html_node,
+    markdown_to_blocks,
+    block_to_html_node,
+    extract_title,
+)
+from src.htmlnode import HTMLNode, ParentNode
 
 root_path = "static"
 path_items = os.listdir(path="static")
@@ -9,6 +16,34 @@ shutil.rmtree(dest_path)
 
 os.mkdir(dest_path)
 dest_items = os.listdir(path="public")
+
+template_path = "template.html"
+from_path = "content"
+content_items = os.listdir(path="content")
+
+def generate_page(from_path, template_path, dest_path):
+    print(f"Generating page from {from_path} to {dest_path} using {template_path} ")
+    content_list = static_to_public(from_path, dest_path, content_items, depth=0, max_depth=5)
+
+    with open(template_path, "r") as f:
+        template = f.read()
+
+    for path in content_list:
+        with open(path, "r") as f:
+            markdown = f.read()
+        node = markdown_to_html_node(markdown) #returns a ParentNode
+        html_string = ParentNode.to_html(node)
+        title = extract_title(markdown)
+        template = template.replace("{{ Title }}", title, 1)
+        template = template.replace("{{ Content }}", html_string, 1)
+
+        public_path = path.replace("content/", "public/").replace(".md", ".html")
+        os.makedirs(os.path.dirname(public_path), exist_ok=True)
+        with open(public_path, "w") as f:
+            f.write(template)
+
+    #don't need return unless i want to return something to caller
+
 
 
 def static_to_public(root_path, dest_path, path_items, depth=0, max_depth=5):
@@ -36,12 +71,19 @@ def static_to_public(root_path, dest_path, path_items, depth=0, max_depth=5):
 
     return paths_list
 
+
+# always make calls after functions are defined so they get included in caller
+#print data
+generate_page(from_path, template_path, dest_path)
+
 # depth/max depth are "=" (optional) they will already have fixed values
 # the safeguard is then automatically in place, but you can tweak it if you want
 # by passing different values in the call
-static_to_public(root_path, dest_path, path_items)
+#static_to_public(root_path, dest_path, path_items)
 
-"""DATA
+
+
+"""DATA static_to_public
 path: images
 path_items: ['images', 'index.css']
 path_names: static/images

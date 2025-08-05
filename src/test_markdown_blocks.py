@@ -4,10 +4,24 @@ from markdown_blocks import (
     markdown_to_blocks,
     block_to_block_type,
     BlockType,
+    extract_title,
 )
 
 
+
 class TestMarkdownToHTML(unittest.TestCase):
+    
+    def test_extract_title(self):
+        md = """
+# header
+# header?
+asdmapsmpasdmpsadmaps
+dsapdamfpkdasnmfpkadsnf
+sda
+"""     
+        title = extract_title(md)
+        self.assertEqual(title ,"header")
+    
     def test_markdown_to_blocks(self):
         md = """
 This is **bolded** paragraph

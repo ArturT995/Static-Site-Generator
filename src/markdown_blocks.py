@@ -1,8 +1,8 @@
 from enum import Enum
 
-from htmlnode import ParentNode
-from inline_markdown import text_to_textnodes
-from textnode import text_node_to_html_node, TextNode, TextType
+from .htmlnode import ParentNode
+from .inline_markdown import text_to_textnodes
+from .textnode import text_node_to_html_node, TextNode, TextType
 
 
 class BlockType(Enum):
@@ -12,6 +12,15 @@ class BlockType(Enum):
     QUOTE = "quote"
     OLIST = "ordered_list"
     ULIST = "unordered_list"
+
+
+def extract_title(markdown):
+    lines = markdown.split("\n")
+    for line in lines:
+        if "# " in line:
+            line = line.strip("# ")
+            return line
+    raise Exception("No title found")
 
 
 def markdown_to_blocks(markdown):
