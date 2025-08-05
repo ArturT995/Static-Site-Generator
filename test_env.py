@@ -11,10 +11,8 @@ from src.htmlnode import HTMLNode, ParentNode
 from static_to_public import *
 
 # copy functions you wanna test and riddle them with print statements, keep them uncommented here for future tests, while tweaking main files.
-"""
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
-    generate_page(from_path, template_path, dest_path)
-"""
+# comments here may contain outdated data
+
 def generate_page(from_path, template_path, dest_path):
     print(f"Generating page from {from_path} to {dest_path} using {template_path} ")
     content_list = static_to_public(from_path, dest_path, content_items, depth=0, max_depth=5)
