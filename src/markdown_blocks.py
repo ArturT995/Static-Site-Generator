@@ -23,6 +23,17 @@ def extract_title(markdown):
     raise Exception("No title found")
 
 
+#starts the whole conversion chain: calls markdown_to_blocks(markdown) and
+#block_to_html_node(block) which calls block_to_block_type(block) and one of the 8 helper functions below
+def markdown_to_html_node(markdown):
+    blocks = markdown_to_blocks(markdown)
+    children = []
+    for block in blocks:
+        html_node = block_to_html_node(block)
+        children.append(html_node)
+    return ParentNode("div", children, None)
+
+
 def markdown_to_blocks(markdown):
     blocks = markdown.split("\n\n")
     filtered_blocks = []
@@ -32,6 +43,23 @@ def markdown_to_blocks(markdown):
         block = block.strip()
         filtered_blocks.append(block)
     return filtered_blocks
+
+
+def block_to_html_node(block):
+    block_type = block_to_block_type(block)
+    if block_type == BlockType.PARAGRAPH:
+        return paragraph_to_html_node(block)
+    if block_type == BlockType.HEADING:
+        return heading_to_html_node(block)
+    if block_type == BlockType.CODE:
+        return code_to_html_node(block)
+    if block_type == BlockType.OLIST:
+        return olist_to_html_node(block)
+    if block_type == BlockType.ULIST:
+        return ulist_to_html_node(block)
+    if block_type == BlockType.QUOTE:
+        return quote_to_html_node(block)
+    raise ValueError("invalid block type")
 
 
 def block_to_block_type(block):
@@ -59,32 +87,6 @@ def block_to_block_type(block):
             i += 1
         return BlockType.OLIST
     return BlockType.PARAGRAPH
-
-
-def markdown_to_html_node(markdown):
-    blocks = markdown_to_blocks(markdown)
-    children = []
-    for block in blocks:
-        html_node = block_to_html_node(block)
-        children.append(html_node)
-    return ParentNode("div", children, None)
-
-
-def block_to_html_node(block):
-    block_type = block_to_block_type(block)
-    if block_type == BlockType.PARAGRAPH:
-        return paragraph_to_html_node(block)
-    if block_type == BlockType.HEADING:
-        return heading_to_html_node(block)
-    if block_type == BlockType.CODE:
-        return code_to_html_node(block)
-    if block_type == BlockType.OLIST:
-        return olist_to_html_node(block)
-    if block_type == BlockType.ULIST:
-        return ulist_to_html_node(block)
-    if block_type == BlockType.QUOTE:
-        return quote_to_html_node(block)
-    raise ValueError("invalid block type")
 
 
 def text_to_children(text):

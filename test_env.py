@@ -11,7 +11,10 @@ from src.htmlnode import HTMLNode, ParentNode
 from static_to_public import *
 
 # copy functions you wanna test and riddle them with print statements, keep them uncommented here for future tests, while tweaking main files.
-
+"""
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    generate_page(from_path, template_path, dest_path)
+"""
 def generate_page(from_path, template_path, dest_path):
     print(f"Generating page from {from_path} to {dest_path} using {template_path} ")
     content_list = static_to_public(from_path, dest_path, content_items, depth=0, max_depth=5)
@@ -23,31 +26,34 @@ def generate_page(from_path, template_path, dest_path):
     
     
     for path in content_list:
+        
         with open(path, "r") as f:
             markdown = f.read()
         node = markdown_to_html_node(markdown)
-        html_string = ParentNode.to_html(node)
+        html_string = ParentNode.to_html(node)      #returns correct strings even with several nested files.
         title = extract_title(markdown)    #returns Tolkien Fan Club
-        template = template.replace("{{ Title }}", title, 1)
-        template = template.replace("{{ Content }}", html_string, 1)
+        result = template.replace("{{ Title }}", title)
+        result = result.replace("{{ Content }}", html_string)
 
         print("path:", path)               # content/index.md
+        #print("html_string:", html_string) # returns <div>"nodes"</div> long
+        print("title:", title)             # returns different titles from files
+        #print("template:", template)
+        print("result:", result)
         
         
-        print("html_string:", html_string) # returns <div>None</div>
-        print("title:", title)             # probably returns None
         
 
-        public_path = path.replace("content/", "public/")
+        public_path = path.replace("content/", "public/").replace(".md", ".html")
         os.makedirs(os.path.dirname(public_path), exist_ok=True)
         with open(public_path, "w") as f:
-            f.write(template)
+            f.write(result)
 
         print("public_path:", public_path) # returns public/index.md
 
         #messy prints here if possible
         #print("markdown:", markdown)       # works
-        #print("node:", node)                # messy, lots of nodes
+        #print("node:", node)               # messy, lots of nodes
         #print("template:", template)       # works
 
 generate_page(from_path, template_path, dest_path)
